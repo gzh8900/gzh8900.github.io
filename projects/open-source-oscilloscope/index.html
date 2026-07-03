@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>开源示波器固件 | 项目 | 郭泽华</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body><div class="noise-overlay"></div>
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">GZH</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">首页</a><a href="/about/">关于</a><a href="/projects/" class="active">项目</a><a href="/blog/">博客</a><a href="/contact/">联系</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+<main>
+<div class="page-section project-detail reveal">
+
+<a href="/projects/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:1.5rem;gap:0.5rem;">&larr; 返回项目列表</a>
+
+<div class="project-hero theme-rose">
+  <div class="project-icon-lg">📟</div>
+  <h1>开源示波器固件</h1>
+  <p>基于国产 MCU 的迷你示波器开源固件，支持双通道采集、FFT 频谱分析、波形触发等功能，配套 3D 打印外壳。</p>
+</div>
+
+<div class="project-info-grid">
+  <div class="project-info-card"><span class="info-label">主控</span><span class="info-value">GD32F303 (Cortex-M4)</span></div>
+  <div class="project-info-card"><span class="info-label">采样率</span><span class="info-value">20MSa/s (单通道)</span></div>
+  <div class="project-info-card"><span class="info-label">带宽</span><span class="info-value">DC ~ 5MHz</span></div>
+  <div class="project-info-card"><span class="info-label">显示</span><span class="info-value">3.2" TFT 320×240</span></div>
+</div>
+
+<div class="project-section">
+  <h2>项目概述</h2>
+  <p>一款真正开源的迷你示波器，全套资料（固件、原理图、PCB、外壳 STL、上位机）在 GitHub 公开。采用国产 GD32F303 作为主控芯片，ADC 配合外部高速比较器实现 20MSa/s 采样率。</p>
+  <p>包豪斯风格的 3D 打印外壳只需 15 克耗材，整机成本控制在 80 元以内。适合电子爱好者学习示波器原理和嵌入式开发。</p>
+</div>
+
+<div class="project-section">
+  <h2>固件架构</h2>
+  <div class="arch-flow">
+    <span class="arch-block">前端调理</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-block">GD32 ADC 双通道</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-block">DMA 乒乓缓存</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-block">LCD 波形绘制</span>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>技术特性</h2>
+  <div class="feature-list">
+    <div class="feature-item"><span class="feat-icon">📊</span> 双通道，20MSa/s 采样</div>
+    <div class="feature-item"><span class="feat-icon">📈</span> FFT 频谱分析功能</div>
+    <div class="feature-item"><span class="feat-icon">🎯</span> 边沿/脉宽/视频触发</div>
+    <div class="feature-item"><span class="feat-icon">📐</span> 光标测量：电压/时间</div>
+    <div class="feature-item"><span class="feat-icon">💾</span> 波形截图保存到 SD 卡</div>
+    <div class="feature-item"><span class="feat-icon">🔌</span> USB 通信，上位机控制</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>核心指标</h2>
+  <div class="spec-grid">
+    <div class="spec-item"><span class="spec-value">20MSa/s</span><span class="spec-label">最高采样率</span></div>
+    <div class="spec-item"><span class="spec-value">5MHz</span><span class="spec-label">模拟带宽</span></div>
+    <div class="spec-item"><span class="spec-value">&lt;80元</span><span class="spec-label">整机成本</span></div>
+    <div class="spec-item"><span class="spec-value">10mV/div</span><span class="spec-label">最低灵敏度</span></div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>关键代码：ADC 乒乓 DMA</h2>
+<pre><code>#define ADC_BUF_SIZE 2048
+static uint16_t adc_buf[2][ADC_BUF_SIZE];
+static volatile uint8_t active_buf = 0;
+
+void adc_dma_init(void) {
+    dma_config_t dma_cfg = {
+        .periph_addr = (uint32_t)&ADC_DATA_REG,
+        .periph_inc = DMA_PERIPH_INC_DISABLE,
+        .memory_inc = DMA_MEMORY_INC_ENABLE,
+        .direction = DMA_PERIPH_TO_MEMORY,
+        .buffer_size = ADC_BUF_SIZE,
+    };
+    // 双缓冲模式
+    dma_double_buffer_init(DMA1, DMA_CH0,
+        (uint32_t)adc_buf[0], (uint32_t)adc_buf[1], &dma_cfg);
+    dma_interrupt_enable(DMA1, DMA_CH0, DMA_INT_FTF);
+}
+
+void DMA_IRQHandler(void) {
+    if (dma_flag_get(DMA1, DMA_CH0, DMA_INT_FTF)) {
+        dma_flag_clear(DMA1, DMA_CH0, DMA_INT_FTF);
+        active_buf ^= 1;  // 切换缓冲区
+        // 通知绘制线程
+        wave_draw_request(adc_buf[active_buf ^ 1]);
+    }
+}</code></pre>
+</div>
+
+<div class="project-section">
+  <h2>实物展示</h2>
+  <div class="gallery-grid">
+    <div class="gallery-item">📷 示波器正面</div>
+    <div class="gallery-item">📷 3D 打印外壳</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>相关资源</h2>
+  <div class="project-links">
+    <a href="https://github.com/GZE822" target="_blank" class="btn btn-primary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">GitHub 仓库</a>
+    <a href="/projects/" class="btn btn-secondary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">← 返回项目</a>
+  </div>
+</div>
+
+</div>
+</main>
+<footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

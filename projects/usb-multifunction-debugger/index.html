@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USB 多功能调试器 | 项目 | 郭泽华</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body><div class="noise-overlay"></div>
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">GZH</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">首页</a><a href="/about/">关于</a><a href="/projects/" class="active">项目</a><a href="/blog/">博客</a><a href="/contact/">联系</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+<main>
+<div class="page-section project-detail reveal">
+
+<a href="/projects/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:1.5rem;gap:0.5rem;">&larr; 返回项目列表</a>
+
+<div class="project-hero theme-amber">
+  <div class="project-icon-lg">🔧</div>
+  <h1>USB 多功能调试器</h1>
+  <p>集成 USB-UART、SPI 抓包、I2C 扫描、逻辑分析等功能的桌面调试工具，配套上位机软件（Python + PyQt）。</p>
+</div>
+
+<div class="project-info-grid">
+  <div class="project-info-card"><span class="info-label">主控</span><span class="info-value">CH347 + STM32F072</span></div>
+  <div class="project-info-card"><span class="info-label">协议</span><span class="info-value">UART/SPI/I2C/JTAG</span></div>
+  <div class="project-info-card"><span class="info-label">速率</span><span class="info-value">UART: 3Mbps / SPI: 30MHz</span></div>
+  <div class="project-info-card"><span class="info-label">上位机</span><span class="info-value">Python + PyQt6</span></div>
+</div>
+
+<div class="project-section">
+  <h2>项目概述</h2>
+  <p>实验室常用的调试场景需要同时使用串口工具、逻辑分析仪、SPI 抓包器等设备，桌面十分凌乱。于是设计了这款桌面调试工具，将多种协议调试功能集成到一个 USB 设备中，配套统一的上位机软件。</p>
+  <p>CH347 提供 USB 转 UART/SPI/I2C/JTAG 桥接功能，STM32F072 负责扩展逻辑分析仪和协议抓包功能。</p>
+</div>
+
+<div class="project-section">
+  <h2>功能矩阵</h2>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead><tr><th>功能</th><th>实现方式</th><th>性能指标</th></tr></thead>
+    <tbody>
+      <tr><td>USB-UART</td><td>CH347 硬件桥接</td><td>3Mbps, 硬件流控</td></tr>
+      <tr><td>SPI 抓包</td><td>CH347 被动监听模式</td><td>30MHz, 256KB 缓存</td></tr>
+      <tr><td>I2C 扫描</td><td>CH347 + STM32 组合</td><td>400kHz, 自动寻址</td></tr>
+      <tr><td>逻辑分析仪</td><td>STM32F072 直采</td><td>8ch @ 24MHz 采样率</td></tr>
+      <tr><td>PWM 发生器</td><td>STM32 TIM 输出</td><td>1Hz ~ 1MHz</td></tr>
+      <tr><td>协议转换</td><td>UART ↔ SPI 桥接</td><td>实时透明传输</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>技术特性</h2>
+  <div class="feature-list">
+    <div class="feature-item"><span class="feat-icon">🔌</span> USB-C 接口，即插即用</div>
+    <div class="feature-item"><span class="feat-icon">📊</span> 上位机实时波形显示</div>
+    <div class="feature-item"><span class="feat-icon">💾</span> 数据导出 CSV/BIN</div>
+    <div class="feature-item"><span class="feat-icon">🎯</span> 硬件触发抓包</div>
+    <div class="feature-item"><span class="feat-icon">📋</span> 脚本化测试序列</div>
+    <div class="feature-item"><span class="feat-icon">🖥️</span> 开源上位机，跨平台</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>核心指标</h2>
+  <div class="spec-grid">
+    <div class="spec-item"><span class="spec-value">6合1</span><span class="spec-label">集成功能</span></div>
+    <div class="spec-item"><span class="spec-value">3Mbps</span><span class="spec-label">最高串口速率</span></div>
+    <div class="spec-item"><span class="spec-value">24MHz</span><span class="spec-label">逻辑分析采样</span></div>
+    <div class="spec-item"><span class="spec-value">256KB</span><span class="spec-label">抓包缓存</span></div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>上位机界面</h2>
+  <p>PyQt6 构建的上位机软件，支持暗色/亮色主题切换，自定义快捷键，多标签页工作区。</p>
+  <div class="gallery-grid">
+    <div class="gallery-item">📷 主界面</div>
+    <div class="gallery-item">📷 逻辑分析</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>关键代码：数据采集线程</h2>
+<pre><code>class CaptureThread(QThread):
+    data_received = pyqtSignal(bytes)
+
+    def __init__(self, device):
+        super().__init__()
+        self.device = device
+        self.running = False
+
+    def run(self):
+        self.running = True
+        buffer = bytearray()
+        while self.running:
+            chunk = self.device.read(4096, timeout=50)
+            if chunk:
+                buffer.extend(chunk)
+                # 每 1KB 发射一次信号刷新 UI
+                if len(buffer) >= 1024:
+                    self.data_received.emit(bytes(buffer))
+                    buffer.clear()
+        # 发送剩余数据
+        if buffer:
+            self.data_received.emit(bytes(buffer))</code></pre>
+</div>
+
+<div class="project-section">
+  <h2>相关资源</h2>
+  <div class="project-links">
+    <a href="https://github.com/GZE822" target="_blank" class="btn btn-primary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">GitHub 仓库</a>
+    <a href="/projects/" class="btn btn-secondary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">← 返回项目</a>
+  </div>
+</div>
+
+</div>
+</main>
+<footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoRa 无线通信模组 | 项目 | 郭泽华</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body><div class="noise-overlay"></div>
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">GZH</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">首页</a><a href="/about/">关于</a><a href="/projects/" class="active">项目</a><a href="/blog/">博客</a><a href="/contact/">联系</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+<main>
+<div class="page-section project-detail reveal">
+
+<a href="/projects/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:1.5rem;gap:0.5rem;">&larr; 返回项目列表</a>
+
+<div class="project-hero theme-blue">
+  <div class="project-icon-lg">📡</div>
+  <h1>LoRa 无线通信模组</h1>
+  <p>自研 LoRa 通信模组，支持星型组网与中继转发，空旷环境通信距离可达 3km，已应用于工业设备远程监控项目。</p>
+</div>
+
+<div class="project-info-grid">
+  <div class="project-info-card"><span class="info-label">射频芯片</span><span class="info-value">SX1262</span></div>
+  <div class="project-info-card"><span class="info-label">通信距离</span><span class="info-value">3km（开阔）</span></div>
+  <div class="project-info-card"><span class="info-label">频段</span><span class="info-value">CN470 / EU868</span></div>
+  <div class="project-info-card"><span class="info-label">功耗</span><span class="info-value">TX:45mA / Sleep:0.6μA</span></div>
+</div>
+
+<div class="project-section">
+  <h2>项目概述</h2>
+  <p>针对工业设备远程监控场景，设计了一款兼容 LoRaWAN 协议的通信模组。支持自适应数据速率（ADR），内置中继转发算法以扩展网络覆盖。已在一个 500+ 节点的园区项目中部署运行超 12 个月。</p>
+</div>
+
+<div class="project-section">
+  <h2>网络拓扑</h2>
+  <div class="arch-flow">
+    <span class="arch-block">终端节点 ×500</span>
+    <span class="arch-arrow">⬆⬇</span>
+    <span class="arch-block">中继网关 ×8</span>
+    <span class="arch-arrow">⬆⬇</span>
+    <span class="arch-block">LoRaWAN Server</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-block">云端应用</span>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>技术特性</h2>
+  <div class="feature-list">
+    <div class="feature-item"><span class="feat-icon">📶</span> 自适应 SF/SF 速率调整</div>
+    <div class="feature-item"><span class="feat-icon">🔄</span> 中继转发 ≤3 跳</div>
+    <div class="feature-item"><span class="feat-icon">🔋</span> 终端节点续航 &gt;3 年</div>
+    <div class="feature-item"><span class="feat-icon">🛡️</span> AES-128 端到端加密</div>
+    <div class="feature-item"><span class="feat-icon">📊</span> 在线 RSSI 信号热力图</div>
+    <div class="feature-item"><span class="feat-icon">🔧</span> 空中升级（OTAA）</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>核心指标</h2>
+  <div class="spec-grid">
+    <div class="spec-item"><span class="spec-value">3km</span><span class="spec-label">通信距离</span></div>
+    <div class="spec-item"><span class="spec-value">500+</span><span class="spec-label">节点容量</span></div>
+    <div class="spec-item"><span class="spec-value">-137dBm</span><span class="spec-label">灵敏度</span></div>
+    <div class="spec-item"><span class="spec-value">0.6μA</span><span class="spec-label">待机电流</span></div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>固件架构设计</h2>
+  <p>模组固件基于 FreeRTOS，分为三层架构：</p>
+  <ul>
+    <li><strong>硬件抽象层 (HAL)</strong>：封装 SX1262 SPI 驱动、GPIO 控制和定时器</li>
+    <li><strong>协议栈层</strong>：LoRaWAN 1.0.4 协议实现，支持 Class A/C 模式</li>
+    <li><strong>应用层</strong>：传感器数据采集、中继路由算法、OTA 升级管理</li>
+  </ul>
+</div>
+
+<div class="project-section">
+  <h2>关键代码：中继转发</h2>
+<pre><code>typedef struct {
+    uint8_t  hop_count;
+    uint32_t src_addr;
+    uint32_t dst_addr;
+    uint8_t  payload[64];
+} __attribute__((packed)) relay_frame_t;
+
+bool relay_handle(relay_frame_t *frame) {
+    if (frame->hop_count >= MAX_HOPS) return false;
+
+    // 检查是否已转发过（去重）
+    if (relay_dup_check(frame->src_addr, frame->payload)) return false;
+
+    frame->hop_count++;
+    return lora_send(frame, sizeof(relay_frame_t) + frame->payload[0]);
+}</code></pre>
+</div>
+
+<div class="project-section">
+  <h2>实物展示</h2>
+  <div class="gallery-grid">
+    <div class="gallery-item">📷 模组正面</div>
+    <div class="gallery-item">📷 网关设备</div>
+  </div>
+</div>
+
+<div class="project-section">
+  <h2>相关资源</h2>
+  <div class="project-links">
+    <a href="https://github.com/GZE822" target="_blank" class="btn btn-primary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">GitHub 仓库</a>
+    <a href="/projects/" class="btn btn-secondary" style="padding:0.5rem 1.25rem;font-size:0.875rem;">← 返回项目</a>
+  </div>
+</div>
+
+</div>
+</main>
+<footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>
