@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>博客文章 | 郭泽华</title>
+<title>高速 PCB 布局的十条黄金法则 | 郭泽华</title>
+<meta name="description" content="总结我在高频和混合信号 PCB 设计中反复验证过的布局布线经验，适合 2-4 层板的日常设计参考。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="stylesheet" href="/assets/css/main.css">
-<style>.blog-post { max-width: 48rem; margin: 0 auto; }.blog-post p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }.back-link { display: inline-flex; align-items: center; color: var(--accent-light); margin-bottom: 2rem; gap: 0.5rem; }</style>
 </head>
 <body><div class="noise-overlay"></div>
 <nav class="navbar" id="navbar">
@@ -24,11 +24,153 @@
 </nav>
 <div class="nav-overlay" id="nav-overlay"></div>
 <main>
-  <div class="page-section blog-post reveal">
-    <a href="/blog/" class="back-link">&larr; 返回博客列表</a>
-    <div class="blog-meta"><span class="blog-tag">硬件设计</span><span class="blog-date">2026-03-10</span></div>
-    <h2>博客文章</h2>
-    <p>文章内容正在完善中，敬请期待。</p>
+  <div class="page-section article-container reveal">
+    <a href="/blog/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:2rem;gap:0.5rem;">&larr; 返回博客列表</a>
+
+    <article>
+      <div class="article-header">
+        <div class="blog-meta">
+          <span class="blog-tag">硬件设计</span>
+          <span class="blog-date">2026-03-10</span>
+          <span class="reading-time">&#9201; 约 6 分钟</span>
+        </div>
+        <h1>高速 PCB 布局的十条黄金法则</h1>
+        <p class="article-desc">总结我在高频和混合信号 PCB 设计中反复验证过的布局布线经验，适合 2-4 层板的日常设计参考。</p>
+      </div>
+
+      <div class="article-toc">
+        <h4>目录</h4>
+        <ol>
+          <li><a href="#rule1">法则一：完整的地平面优先</a></li>
+          <li><a href="#rule2">法则二：去耦电容就近放置</a></li>
+          <li><a href="#rule3">法则三：关键信号短而直</a></li>
+          <li><a href="#rule4">法则四：避免 90 度直角走线</a></li>
+          <li><a href="#rule5">法则五：模拟与数字分区</a></li>
+          <li><a href="#rule6">法则六：差分对等长布线</a></li>
+          <li><a href="#rule7">法则七：电源走线加宽</a></li>
+          <li><a href="#rule8">法则八：过孔使用策略</a></li>
+          <li><a href="#rule9">法则九：散热与热管理</a></li>
+          <li><a href="#rule10">法则十：DRC 规则检查</a></li>
+        </ol>
+      </div>
+
+      <div class="article-body">
+
+<p>从 KiCad 到 Altium Designer，我先后设计过 30 多块 PCB，从简单的传感器转接板到 4 层高速数字板。以下十条是我最常回顾的布局指南，每一条背后都有至少一次烧板或信号异常的教训。</p>
+
+<h2 id="rule1">法则一：完整的地平面优先</h2>
+<p>这是最重要的原则。<strong>所有信号线的回流路径都应该经过连续的地平面</strong>，而不是从地线缝隙中绕行。在 2 层板上尽量将底层铺满地铜；在 4 层板上，将第二层设为完整地平面。</p>
+<div class="highlight-box">
+  <span class="highlight-label">为什么重要</span>
+  <p>信号的回流电流会走阻抗最小的路径——对于高频信号，这个路径就是紧贴信号线下方的地平面。如果地平面被切断，回流电流被迫绕行，回路面积增大，产生严重 EMI 和串扰。</p>
+</div>
+
+<h2 id="rule2">法则二：去耦电容就近放置</h2>
+<p>每对电源引脚都需要一个 100nF 去耦电容，且必须放置在距引脚 <strong>3mm 以内</strong> 的位置。电容到电源引脚的走线宽度不低于电容焊盘宽度，过孔贴近电容地焊盘。</p>
+<pre><code>去耦电容选型参考：
+- 100nF (0603): 主去耦，覆盖 10MHz~100MHz 噪声
+- 10μF (0805): 大容量去耦，覆盖 1MHz~10MHz
+- 1nF (0402): 超高频去耦，用于 RF 电路</code></pre>
+
+<h2 id="rule3">法则三：关键信号短而直</h2>
+<p>时钟信号、高速数据线、复位信号和模拟信号属于<strong>关键信号</strong>，应该：</p>
+<ul>
+  <li>优先布线，尽量走在同一层</li>
+  <li>长度尽可能短</li>
+  <li>避免跨越分割的地平面</li>
+  <li>两侧用地线屏蔽</li>
+  <li>远离板边（至少 5mm）以减少边缘辐射</li>
+</ul>
+
+<h2 id="rule4">法则四：避免 90 度直角走线</h2>
+<p>直角走线在转角处会形成<strong>阻抗突变</strong>和额外的寄生电容。在高频信号中，这种不连续会导致信号反射和谐波辐射。使用 45 度斜角或圆弧走线代替。</p>
+<div class="highlight-box">
+  <span class="highlight-label">经验</span>
+  <p>在 1GHz 以下，直角走线的反射损耗通常可以忽略，但我仍然建议养成 45 度走线的习惯——实际上在布线工具中按 Shift+Space 切换走线角度并不费事。</p>
+</div>
+
+<h2 id="rule5">法则五：模拟与数字分区</h2>
+<p>混合信号 PCB 上，<strong>模拟电路和数字电路应该分区布局</strong>，不能混在一起。地平面通过"桥"的方式在 ADC/DAC 芯片下方单点连接。</p>
+<table>
+  <thead>
+    <tr><th>区域</th><th>典型电路</th><th>注意事项</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数字区</td><td>MCU、DDR、Flash</td><td>高速开关噪声大</td></tr>
+    <tr><td>模拟区</td><td>运放、ADC 前端、传感器</td><td>对噪声敏感</td></tr>
+    <tr><td>电源区</td><td>DC-DC、LDO、滤波</td><td>隔离开关噪声</td></tr>
+    <tr><td>射频区</td><td>天线匹配、PA、LNA</td><td>需要独立地平面</td></tr>
+  </tbody>
+</table>
+
+<h2 id="rule6">法则六：差分对等长布线</h2>
+<p>USB、Ethernet、CAN 等差分信号对必须<strong>等长、等宽、等间距</strong>。差分对内的两条走线长度差控制在 5mil 以内，对间间距保持恒定（通常 3W 原则）。</p>
+<pre><code>差分对布线检查清单：
+- [ ] 两条走线长度差 &lt; 5mil
+- [ ] 差分对间距恒定
+- [ ] 远离其他信号 &gt; 3x 线宽
+- [ ] 过孔数量一致（最好不超过 2 个）
+- [ ] 与其他差分对的间距 &gt; 5x 线宽</code></pre>
+
+<h2 id="rule7">法则七：电源走线加宽</h2>
+<p>电源走线宽度应该根据<strong>载流需求</strong>确定。对于 PCB 外层 1oz 铜厚：</p>
+<table>
+  <thead>
+    <tr><th>载流 (A)</th><th>最小线宽 (mm) - 外层 1oz</th><th>最小线宽 (mm) - 内层 1oz</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0.5</td><td>0.25</td><td>0.5</td></tr>
+    <tr><td>1.0</td><td>0.5</td><td>1.0</td></tr>
+    <tr><td>2.0</td><td>1.25</td><td>2.5</td></tr>
+    <tr><td>3.0</td><td>2.5</td><td>5.0</td></tr>
+  </tbody>
+</table>
+
+<h2 id="rule8">法则八：过孔使用策略</h2>
+<p>过孔增加了走线的寄生电感和电容。在高速设计中：</p>
+<ul>
+  <li><strong>信号换层</strong>尽量使用 3~4 个地过孔包围信号过孔，提供回流路径</li>
+  <li><strong>电源过孔</strong>使用多个并联以降低电阻和电感</li>
+  <li><strong>避免在敏感信号线上使用过孔</strong>——一个过孔约等效于 5~10mm 走线的电感</li>
+  <li>过孔尺寸尽量统一，减少加工复杂度</li>
+</ul>
+
+<h2 id="rule9">法则九：散热与热管理</h2>
+<p>大功率器件（LDO、MOSFET、DC-DC 芯片）需要充分的散热设计：</p>
+<ul>
+  <li>在芯片下方放置散热过孔阵列（thermal via array）传导热量到内层铜皮</li>
+  <li>电源芯片的散热焊盘（exposed pad）必须焊接到地平面</li>
+  <li>热敏感器件（晶振、传感器）远离发热源</li>
+  <li>预留风道空间，避免大电容阻挡气流</li>
+</ul>
+
+<h2 id="rule10">法则十：DRC 规则检查不可跳步</h2>
+<p>出 Gerber 文件之前，<strong>运行完整的 DRC（设计规则检查）</strong>。我设置的最小检查项：</p>
+<pre><code>必设 DRC 规则（KiCad / Altium）：
+- 最小线宽:    6mil (信号) / 12mil (电源)
+- 最小间距:    6mil
+- 最小过孔环:  4mil
+- 最小钻孔:    0.3mm
+- 丝印间距:    5mil
+- 板边到铜皮:  15mil</code></pre>
+
+<div class="highlight-box">
+  <span class="highlight-label">最终建议</span>
+  <p>以上十法则不是教条，而是取舍。最重要的是一块板子结束后认真复盘——哪些走线导致了 EMC 测试不过，哪个布局让焊接变得困难。把经验写下来，下次打板前翻翻。至少我每次回头看自己半年前的设计，总能找到可以改进的地方。</p>
+</div>
+
+      </div>
+
+      <div class="article-footer">
+        <div class="article-tags">
+          <span class="blog-tag">PCB</span>
+          <span class="blog-tag">硬件设计</span>
+          <span class="blog-tag">KiCad</span>
+          <span class="blog-tag">Altium</span>
+        </div>
+        <a href="/blog/" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;">← 返回博客</a>
+      </div>
+    </article>
   </div>
 </main>
 <footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>

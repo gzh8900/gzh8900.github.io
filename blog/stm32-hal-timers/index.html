@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>博客文章 | 郭泽华</title>
+<title>STM32 HAL 库定时器开发避坑指南 | 郭泽华</title>
+<meta name="description" content="HAL 库的定时器 API 暗藏不少陷阱，本文整理了我在实际项目中遇到的 5 个典型问题及解决方案。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="stylesheet" href="/assets/css/main.css">
-<style>.blog-post { max-width: 48rem; margin: 0 auto; }.blog-post p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }.back-link { display: inline-flex; align-items: center; color: var(--accent-light); margin-bottom: 2rem; gap: 0.5rem; }</style>
 </head>
 <body><div class="noise-overlay"></div>
 <nav class="navbar" id="navbar">
@@ -24,11 +24,193 @@
 </nav>
 <div class="nav-overlay" id="nav-overlay"></div>
 <main>
-  <div class="page-section blog-post reveal">
-    <a href="/blog/" class="back-link">&larr; 返回博客列表</a>
-    <div class="blog-meta"><span class="blog-tag">嵌入式</span><span class="blog-date">2026-04-20</span></div>
-    <h2>博客文章</h2>
-    <p>文章内容正在完善中，敬请期待。</p>
+  <div class="page-section article-container reveal">
+    <a href="/blog/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:2rem;gap:0.5rem;">&larr; 返回博客列表</a>
+
+    <article>
+      <div class="article-header">
+        <div class="blog-meta">
+          <span class="blog-tag">嵌入式</span>
+          <span class="blog-date">2026-04-20</span>
+          <span class="reading-time">&#9201; 约 7 分钟</span>
+        </div>
+        <h1>STM32 HAL 库定时器开发避坑指南</h1>
+        <p class="article-desc">HAL 库的定时器 API 暗藏不少陷阱，本文整理了我在实际项目中遇到的 5 个典型问题及解决方案。</p>
+      </div>
+
+      <div class="article-toc">
+        <h4>目录</h4>
+        <ol>
+          <li><a href="#pitfall1">陷阱一：HAL_TIM_PWM_Start 之后竟然不输出</a></li>
+          <li><a href="#pitfall2">陷阱二：中断回调函数里的死循环</a></li>
+          <li><a href="#pitfall3">陷阱三：自动重载预装载的时机问题</a></li>
+          <li><a href="#pitfall4">陷阱四：编码器模式计数不准</a></li>
+          <li><a href="#pitfall5">陷阱五：定时器同步的微妙依赖</a></li>
+        </ol>
+      </div>
+
+      <div class="article-body">
+
+<p>使用 STM32 HAL 库开发定时器功能时，API 看似简单，实际项目中有不少隐形的坑。这篇文章总结了我在 <strong>STM32F4</strong> 和 <strong>STM32G0</strong> 系列上调试定时器时遇到的 5 个典型问题。</p>
+
+<h2 id="pitfall1">陷阱一：HAL_TIM_PWM_Start 之后竟然不输出</h2>
+<p><strong>现象</strong>：调用 <code>HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_1)</code> 后，用示波器测量对应引脚，始终没有 PWM 波形输出。</p>
+<p><strong>根因</strong>：HAL 库的 <code>HAL_TIM_PWM_Start</code> 仅开启了定时器的计数和输出比较通道，但没有配置 GPIO 复用功能。如果在 CubeMX 中没有将对应引脚设置为 <code>AFx（TIMx_CHy）</code>，或者在代码中未调用 <code>HAL_GPIO_Init</code>，引脚会保持默认 GPIO 模式。</p>
+<pre><code>// 正确的初始化顺序
+void pwm_init(void) {
+    // 1. GPIO 配置（必须在启动定时器之前）
+    GPIO_InitTypeDef gpio = {0};
+    gpio.Pin = GPIO_PIN_0;
+    gpio.Mode = GPIO_MODE_AF_PP;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio.Alternate = GPIO_AF2_TIM5;
+    HAL_GPIO_Init(GPIOA, &gpio);
+
+    // 2. 定时器配置
+    htim5.Instance = TIM5;
+    htim5.Init.Prescaler = 84 - 1;         // 84MHz / 84 = 1MHz
+    htim5.Init.Period = 1000 - 1;           // 1kHz PWM
+    htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+    HAL_TIM_PWM_Init(&htim5);
+
+    // 3. 配置输出比较通道
+    TIM_OC_InitTypeDef oc = {0};
+    oc.OCMode = TIM_OCMODE_PWM1;
+    oc.Pulse = 500;                         // 50% 占空比
+    oc.OCPolarity = TIM_OCPOLARITY_HIGH;
+    oc.OCFastMode = TIM_OCFAST_DISABLE;
+    HAL_TIM_PWM_ConfigChannel(&htim5, &oc, TIM_CHANNEL_1);
+
+    // 4. 启动 PWM
+    HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+}</code></pre>
+<div class="highlight-box">
+  <span class="highlight-label">经验</span>
+  <p>调试 PWM 输出问题时，先用示波器确认引脚复用功能是否正确配置。CubeMX 生成代码时偶尔会遗漏 <code>HAL_GPIO_Init</code> 调用，务必检查。</p>
+</div>
+
+<h2 id="pitfall2">陷阱二：中断回调函数里的死循环</h2>
+<p><strong>现象</strong>：使能了定时器更新中断后，程序在 <code>HAL_TIM_PeriodElapsedCallback</code> 中卡死。</p>
+<p><strong>根因</strong>：HAL 库的中断处理流程是：进入 IRQHandler → 清除标志位 → 调用回调函数。但如果回调函数中调用了 <code>HAL_Delay</code>，而 <code>HAL_Delay</code> 依赖 SysTick 中断，SysTick 中断优先级如果低于当前定时器中断，就会死锁。</p>
+<pre><code>// 错误示例 - 可能死锁
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM3) {
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        HAL_Delay(100);  // ← 如果 TIM3 优先级高于 SysTick，这里死锁！
+    }
+}
+
+// 正确做法 - 使用标志位 + 主循环处理
+volatile uint8_t tim3_flag = 0;
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM3) {
+        tim3_flag = 1;  // 只设置标志位
+    }
+}
+
+void main_loop(void) {
+    while (1) {
+        if (tim3_flag) {
+            tim3_flag = 0;
+            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+            HAL_Delay(100);  // 主循环中调用，安全
+        }
+    }
+}</code></pre>
+
+<h2 id="pitfall3">陷阱三：自动重载预装载的时机问题</h2>
+<p><strong>现象</strong>：运行时动态修改定时器 Period 值，结果 PWM 频率出现短暂毛刺或完全错误。</p>
+<p><strong>根因</strong>：ARR（自动重载寄存器）有两种更新方式——立即更新和预装载更新。默认配置下，HAL 库启用预装载（<code>TIM_ARRPreload</code> 使能），ARR 值在下一个更新事件（UEV）时才生效。如果直接写 <code>htim->Instance->ARR = new_val</code> 然后立即期盼新频率，就会与预期不符。</p>
+<pre><code>// 方式一：通过 API 更新（推荐）
+__HAL_TIM_SET_AUTORELOAD(&htim, new_period);
+
+// 方式二：生成软件更新事件立即生效
+htim.Instance->ARR = new_period;
+__HAL_TIM_ENABLE_IT(&htim, TIM_IT_UPDATE);   // 使能更新中断
+htim.Instance->EGR = TIM_EGR_UG;             // 产生软件更新
+__HAL_TIM_DISABLE_IT(&htim, TIM_IT_UPDATE);  // 关闭更新中断
+// 注意：UG 位会同时清除计数器 CNT，如果不需要清零，
+// 需重新设置 CNT 值</code></pre>
+<div class="highlight-box">
+  <span class="highlight-label">关键</span>
+  <p>修改占空比（CCR）是立即生效的，但修改周期（ARR）受预装载控制。如果需要同时修改频率和占空比，先改 ARR，再等更新事件后改 CCR。</p>
+</div>
+
+<h2 id="pitfall4">陷阱四：编码器模式计数不准</h2>
+<p><strong>现象</strong>：使用定时器编码器模式读取电机转速，正转时计数正确，反转时数值乱跳。</p>
+<p><strong>根因</strong>：编码器模式下，定时器工作在 <code>slave mode</code>，计数方向由 TI1 和 TI2 的相位决定。但 HAL 库初始化编码器模式时有一个常见遗漏——没有配置输入滤波和极性，导致信号抖动引起误触发。</p>
+<pre><code>void encoder_init(void) {
+    TIM_Encoder_InitTypeDef enc = {0};
+    enc.EncoderMode = TIM_ENCODERMODE_TI12;  // TI1+TI2 双沿计数
+
+    // 必须配置输入滤波！
+    TIM_IC_InitTypeDef ic1 = {0};
+    ic1.ICPolarity = TIM_ICPOLARITY_RISING;
+    ic1.ICSelection = TIM_ICSELECTION_DIRECTTI;
+    ic1.ICPrescaler = TIM_ICPSC_DIV1;
+    ic1.ICFilter = 8;    // ← 关键！8 个采样周期的数字滤波
+    HAL_TIM_IC_ConfigChannel(&htim, &ic1, TIM_CHANNEL_1);
+
+    TIM_IC_InitTypeDef ic2 = {0};
+    ic2.ICPolarity = TIM_ICPOLARITY_RISING;
+    ic2.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+    ic2.ICPrescaler = TIM_ICPSC_DIV1;
+    ic2.ICFilter = 8;    // ← 同样需要滤波
+    HAL_TIM_IC_ConfigChannel(&htim, &ic2, TIM_CHANNEL_2);
+
+    HAL_TIM_Encoder_Init(&htim, &enc);
+    HAL_TIM_Encoder_Start(&htim, TIM_CHANNEL_ALL);
+}</code></pre>
+
+<h2 id="pitfall5">陷阱五：定时器同步的微妙依赖</h2>
+<p><strong>现象</strong>：两个定时器级联（如 TIM2 作为主定时器触发 TIM3），TIM3 不启动或计数不完整。</p>
+<p><strong>根因</strong>：定时器同步时，<strong>从定时器必须在主定时器之前完成初始化</strong>。HAL 库的初始化过程会重置定时器的全部寄存器，如果在主定时器已启动之后才初始化从定时器，从定时器的同步配置会被覆盖。</p>
+<pre><code>// 正确的初始化顺序
+void timer_sync_init(void) {
+    // 1. 先初始化从定时器 (TIM3)
+    HAL_TIM_Base_Init(&htim3);
+
+    // 2. 配置从模式
+    TIM_SlaveConfigTypeDef slave = {0};
+    slave.SlaveMode = TIM_SLAVEMODE_GATED;
+    slave.InputTrigger = TIM_TS_ITR0;  // TIM2 连接到 ITR0
+    HAL_TIM_SlaveConfigSynchronization(&htim3, &slave);
+
+    // 3. 再初始化主定时器 (TIM2)
+    HAL_TIM_Base_Init(&htim2);
+
+    // 4. 配置主模式触发输出
+    TIM_MasterConfigTypeDef master = {0};
+    master.MasterOutputTrigger = TIM_TRGO_UPDATE;
+    master.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
+    HAL_TIMEx_MasterConfigSynchronization(&htim2, &master);
+
+    // 5. 启动顺序：先从后主
+    HAL_TIM_Base_Start(&htim3);  // 从定时器先启动
+    HAL_TIM_Base_Start(&htim2);  // 主定时器后启动
+}</code></pre>
+
+<div class="highlight-box">
+  <span class="highlight-label">调试建议</span>
+  <p>遇到定时器问题，打开 HAL 库的调试跟踪宏 <code>#define HAL_TIM_MODULE_ENABLED</code>，配合逻辑分析仪观察定时器输出引脚和触发信号，往往能快速定位问题。</p>
+</div>
+
+<p>以上五个坑是我在三年 STM32 开发中反复踩过的。HAL 库虽然封装了底层寄存器操作，但理解其背后的硬件逻辑才能真正用好它。</p>
+
+      </div>
+
+      <div class="article-footer">
+        <div class="article-tags">
+          <span class="blog-tag">STM32</span>
+          <span class="blog-tag">HAL库</span>
+          <span class="blog-tag">定时器</span>
+          <span class="blog-tag">C</span>
+        </div>
+        <a href="/blog/" class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.875rem;">← 返回博客</a>
+      </div>
+    </article>
   </div>
 </main>
 <footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>
