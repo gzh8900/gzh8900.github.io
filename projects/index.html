@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>项目展示 | 郭泽华 - 嵌入式工程师</title>
+<meta name="description" content="郭泽华的硬件项目展示 - 智能环境监测终端, LoRa通信模组, 四轴飞行器飞控等">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">GZH</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">首页</a>
+      <a href="/about/">关于</a>
+      <a href="/projects/" class="active">项目</a>
+      <a href="/blog/">博客</a>
+      <a href="/contact/">联系</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+
+<main>
+  <div class="page-section">
+    <div class="page-header reveal">
+      <h2>项目展示</h2>
+      <p>一些我参与和主导的硬件项目</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="projects-grid">
+      <div class="project-card reveal reveal-delay-1">
+        <div class="project-icon">🔌</div>
+        <div class="project-body">
+          <h3>智能环境监测终端</h3>
+          <p>基于 ESP32 + 多传感器阵列的低功耗环境监测设备，支持温湿度、PM2.5、CO2 等指标采集，通过 MQTT 上传至云端仪表盘。</p>
+          <div class="project-tags">
+            <span>ESP32</span><span>MQTT</span><span>FreeRTOS</span><span>KiCad</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-1">
+        <div class="project-icon">📡</div>
+        <div class="project-body">
+          <h3>LoRa 无线通信模组</h3>
+          <p>自研 LoRa 通信模组，支持星型组网与中继转发，空旷环境通信距离可达 3km，已应用于工业设备远程监控项目。</p>
+          <div class="project-tags">
+            <span>LoRa</span><span>SX1278</span><span>STM32</span><span>Altium Designer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-2">
+        <div class="project-icon">🚁</div>
+        <div class="project-body">
+          <h3>四轴飞行器飞控</h3>
+          <p>从零搭建的四旋翼飞行控制系统，包含姿态解算（Madgwick AHRS）、PID 控制、无线数传等模块，基于 STM32F4 平台。</p>
+          <div class="project-tags">
+            <span>STM32F4</span><span>PID</span><span>MPU6050</span><span>C</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-2">
+        <div class="project-icon">🔌</div>
+        <div class="project-body">
+          <h3>智能家居中控面板</h3>
+          <p>基于 ESP32-S3 + LVGL 的触控中控屏，支持 Zigbee/WiFi 双模通信，可对接 Home Assistant，自定义 UI 界面。</p>
+          <div class="project-tags">
+            <span>ESP32-S3</span><span>LVGL</span><span>Zigbee</span><span>Home Assistant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-3">
+        <div class="project-icon">🔧</div>
+        <div class="project-body">
+          <h3>USB 多功能调试器</h3>
+          <p>集成 USB-UART、SPI 抓包、I2C 扫描、逻辑分析等功能的桌面调试工具，配套上位机软件（Python + PyQt）。</p>
+          <div class="project-tags">
+            <span>CH347</span><span>Python</span><span>PyQt</span><span>PCB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-3">
+        <div class="project-icon">📟</div>
+        <div class="project-body">
+          <h3>开源示波器固件</h3>
+          <p>基于国产 MCU 的迷你示波器开源固件，支持双通道采集、FFT 频谱分析、波形触发等功能，配套 3D 打印外壳。</p>
+          <div class="project-tags">
+            <span>GD32</span><span>ADC</span><span>FFT</span><span>开源</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p>
+</footer>
+
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

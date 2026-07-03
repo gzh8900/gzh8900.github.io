@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>技术博客 | 郭泽华 - 嵌入式工程师</title>
+<meta name="description" content="郭泽华的技术博客 - ESP32低功耗设计, STM32 HAL库, PCB布局等嵌入式技术文章">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">GZH</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">首页</a>
+      <a href="/about/">关于</a>
+      <a href="/projects/">项目</a>
+      <a href="/blog/" class="active">博客</a>
+      <a href="/contact/">联系</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+
+<main>
+  <div class="page-section">
+    <div class="page-header reveal">
+      <h2>技术博客</h2>
+      <p>记录踩过的坑和绕过的弯路</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="blog-list">
+      <a href="/blog/esp32-low-power-design/" class="blog-card reveal reveal-delay-1">
+        <div class="blog-meta">
+          <span class="blog-tag">嵌入式</span>
+          <span class="blog-date">2026-05-15</span>
+        </div>
+        <h3>ESP32 低功耗设计实战：从 80mA 到 8μA 的优化之路</h3>
+        <p>记录一个电池供电项目中 ESP32 功耗优化的完整过程，包含硬件选型、固件策略和实测数据对比。</p>
+      </a>
+
+      <a href="/blog/stm32-hal-timers/" class="blog-card reveal reveal-delay-2">
+        <div class="blog-meta">
+          <span class="blog-tag">嵌入式</span>
+          <span class="blog-date">2026-04-20</span>
+        </div>
+        <h3>STM32 HAL 库定时器开发避坑指南</h3>
+        <p>HAL 库的定时器 API 暗藏不少陷阱，本文整理了我在实际项目中遇到的 5 个典型问题及解决方案。</p>
+      </a>
+
+      <a href="/blog/pcb-layout-tips/" class="blog-card reveal reveal-delay-3">
+        <div class="blog-meta">
+          <span class="blog-tag">硬件设计</span>
+          <span class="blog-date">2026-03-10</span>
+        </div>
+        <h3>高速 PCB 布局的十条黄金法则</h3>
+        <p>总结我在高频和混合信号 PCB 设计中反复验证过的布局布线经验，适合 2-4 层板的日常设计参考。</p>
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p>
+</footer>
+
+<script src="/assets/js/main.js"></script>
+</body>
+</html>
