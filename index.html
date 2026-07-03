@@ -6,13 +6,15 @@
 <title>郭泽华 | 嵌入式工程师</title>
 <meta name="description" content="郭泽华的个人网站 - 嵌入式工程师 · 硬件极客">
 <meta name="keywords" content="嵌入式,硬件,嵌入式工程师,PCB设计,STM32,ESP32,物联网">
+<meta property="og:title" content="郭泽华 | 嵌入式工程师">
+<meta property="og:description" content="嵌入式工程师 · 硬件极客 · 热衷于电子硬件设计与嵌入式系统开发">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
 <div class="noise-overlay"></div>
 
-<!-- Navbar -->
 <nav class="navbar" id="navbar">
   <div class="nav-inner">
     <a href="/" class="logo">GZH</a>
@@ -30,8 +32,8 @@
 </nav>
 <div class="nav-overlay" id="nav-overlay"></div>
 
-<!-- Hero -->
-<main>
+<main class="home-main">
+  <!-- Hero -->
   <section class="hero">
     <canvas id="hero-canvas"></canvas>
     <div class="hero-content">
@@ -39,6 +41,16 @@
       <h1 class="reveal reveal-delay-1">郭泽华</h1>
       <p class="subtitle reveal reveal-delay-2">嵌入式工程师 · 硬件极客</p>
       <p class="description reveal reveal-delay-3">热衷于电子硬件设计与嵌入式系统开发，每一块电路板都是有灵魂的。</p>
+
+      <div class="social-bar reveal reveal-delay-3">
+        <a href="https://github.com/GZE822" target="_blank" rel="noopener noreferrer" class="social-link">
+          <span class="sl-icon">GH</span> GitHub
+        </a>
+        <a href="mailto:hello@guozehua.dev" class="social-link">
+          <span class="sl-icon">@</span> 邮箱
+        </a>
+      </div>
+
       <div class="hero-actions reveal reveal-delay-4">
         <a href="/projects/" class="btn btn-primary">查看项目</a>
         <a href="/contact/" class="btn btn-secondary">联系我</a>
@@ -49,12 +61,104 @@
       <div class="mouse"></div>
     </div>
   </section>
+
+  <!-- Featured Projects -->
+  <section class="home-section reveal">
+    <div class="section-header">
+      <div>
+        <h2>精选项目</h2>
+        <p class="section-sub">一些我参与和主导的硬件项目</p>
+      </div>
+      <a href="/projects/" class="section-link">查看全部 →</a>
+    </div>
+    <div class="home-project-grid">
+      <a href="/projects/smart-environment-monitor/" class="home-project-card">
+        <span class="hp-icon">🔌</span>
+        <div class="hp-body">
+          <h3>智能环境监测终端</h3>
+          <p>ESP32 + 多传感器，MQTT 上传，平均功耗 45μA</p>
+        </div>
+        <span class="hp-arrow">→</span>
+      </a>
+      <a href="/projects/lora-wireless-module/" class="home-project-card">
+        <span class="hp-icon">📡</span>
+        <div class="hp-body">
+          <h3>LoRa 无线通信模组</h3>
+          <p>自研 SX1262 模组，通信距离 3km，500+ 节点</p>
+        </div>
+        <span class="hp-arrow">→</span>
+      </a>
+      <a href="/projects/quadcopter-flight-controller/" class="home-project-card">
+        <span class="hp-icon">🚁</span>
+        <div class="hp-body">
+          <h3>四轴飞行器飞控</h3>
+          <p>STM32F4 + Madgwick AHRS，串级 PID 控制</p>
+        </div>
+        <span class="hp-arrow">→</span>
+      </a>
+      <a href="/projects/smart-home-panel/" class="home-project-card">
+        <span class="hp-icon">🏠</span>
+        <div class="hp-body">
+          <h3>智能家居中控面板</h3>
+          <p>ESP32-S3 + LVGL 触控屏，对接 Home Assistant</p>
+        </div>
+        <span class="hp-arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Latest Blog -->
+  <section class="home-section reveal">
+    <div class="section-header">
+      <div>
+        <h2>最新文章</h2>
+        <p class="section-sub">记录踩过的坑和绕过的弯路</p>
+      </div>
+      <a href="/blog/" class="section-link">全部文章 →</a>
+    </div>
+    <div class="home-blog-list">
+      <a href="/blog/esp32-low-power-design/" class="home-blog-card">
+        <div class="hb-meta">
+          <span class="hb-tag">嵌入式</span>
+          <span class="hb-date">2026-05-15</span>
+        </div>
+        <h3>ESP32 低功耗设计实战：从 80mA 到 8μA</h3>
+        <p>电池供电项目中 ESP32 功耗优化的完整过程，含硬件选型、固件策略和实测数据。</p>
+        <span class="hb-read">阅读全文 →</span>
+      </a>
+      <a href="/blog/stm32-hal-timers/" class="home-blog-card">
+        <div class="hb-meta">
+          <span class="hb-tag">嵌入式</span>
+          <span class="hb-date">2026-04-20</span>
+        </div>
+        <h3>STM32 HAL 库定时器开发避坑指南</h3>
+        <p>实际项目中遇到的 5 个典型定时器问题及解决方案，附完整代码。</p>
+        <span class="hb-read">阅读全文 →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Quote -->
+  <div class="quote-banner reveal">
+    "每一块电路板都是有灵魂的，每一个焊点都是思考的痕迹。"
+  </div>
+
+  <!-- CTA -->
+  <section class="home-cta reveal">
+    <h2>一起做点硬核的东西</h2>
+    <p>欢迎技术交流、项目合作，或者只是聊聊硬件和嵌入式</p>
+    <div class="home-cta-actions">
+      <a href="/contact/" class="btn btn-primary">联系我</a>
+      <a href="https://github.com/GZE822" target="_blank" rel="noopener noreferrer" class="btn btn-outline">GitHub</a>
+    </div>
+  </section>
 </main>
 
-<!-- Footer -->
 <footer>
   <p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p>
 </footer>
+
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
 
 <script src="/assets/js/main.js"></script>
 </body>

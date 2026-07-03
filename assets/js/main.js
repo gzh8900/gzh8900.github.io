@@ -159,3 +159,29 @@ if (contactForm) {
     }, 1200);
   });
 }
+/* ===== Back to Top ===== */
+const backTop = document.getElementById('backTop');
+if (backTop) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+      backTop.classList.add('visible');
+    } else {
+      backTop.classList.remove('visible');
+    }
+  });
+  backTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ===== Reading Progress Bar ===== */
+const progressBar = document.getElementById('readingProgress');
+if (progressBar) {
+  const fill = progressBar.querySelector('.rp-fill');
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    fill.style.width = progress + '%';
+  });
+}

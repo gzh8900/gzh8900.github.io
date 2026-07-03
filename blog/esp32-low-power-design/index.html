@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ESP32 低功耗设计实战：从 80mA 到 8μA 的优化之路 | 郭泽华</title>
+<meta property="og:title" content="郭泽华 | 嵌入式工程师">
+<meta property="og:description" content="嵌入式工程师 · 硬件极客">
+<meta property="og:type" content="website">
+
 <meta name="description" content="记录一个电池供电项目中 ESP32 功耗优化的完整过程，包含硬件选型、固件策略和实测数据对比。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="stylesheet" href="/assets/css/main.css">
@@ -23,7 +27,7 @@
   </div>
 </nav>
 <div class="nav-overlay" id="nav-overlay"></div>
-<main>
+<main><div class="reading-progress" id="readingProgress"><div class="rp-fill"></div></div>
   <div class="page-section article-container reveal">
     <a href="/blog/" class="back-link" style="display:inline-flex;align-items:center;color:var(--accent-light);margin-bottom:2rem;gap:0.5rem;">&larr; 返回博客列表</a>
 
@@ -196,5 +200,8 @@ uint32_t read_battery() {
 </main>
 <footer><p>&copy; 2026 郭泽华. 用 ❤️ 打造。</p></footer>
 <script src="/assets/js/main.js"></script>
-</body>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button></body>
 </html>
+
+
+
